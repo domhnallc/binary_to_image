@@ -13,30 +13,50 @@ pip install -r requirements.txt
 
 ## Usage
 
-Both scripts read every file in `malware_binaries/` and write results to a
-sibling output folder. Run them from the repo root.
+Both scripts take the same options and run in one of two modes:
+
+| Option | Mode | Meaning |
+| --- | --- | --- |
+| `-i`, `--input FILE` | single file | binary file to convert |
+| `-o`, `--output FILE` | single file | file to write (parent folders are created) |
+| `-I`, `--input-dir DIR` | folder | convert every file in this folder (subfolders are skipped) |
+| `-O`, `--output-dir DIR` | folder | folder to save the converted files into (created if missing) |
+
+`--input` and `--output` must be given together, as must `--input-dir` and
+`--output-dir`, and the two modes can't be combined. With no options, folder
+mode runs on the defaults: `malware_binaries/` in, `malware_images/` or
+`malware_tone_audio/` out.
 
 ### Binary to image
 
 ```bash
-python binary_to_image.py
+# one file
+python binary_to_image.py -i malware_binaries/ls -o out/ls.png
+
+# every file in a folder
+python binary_to_image.py -I malware_binaries -O out/images
 ```
 
 Each file's bytes are laid out as pixel rows (width 256, zero-padded), then
-resized to 224x224 and saved as a grayscale PNG in `malware_images/`.
+resized to 224x224 and saved as a grayscale PNG. In folder mode each output is
+named after its input with a `.png` extension.
 
 ### Binary to audio
 
 ```bash
-python binary_to_audio.py
+# one file
+python binary_to_audio.py -i malware_binaries/ls -o out/ls.wav
+
+# every file in a folder
+python binary_to_audio.py -I malware_binaries -O out/audio
 ```
 
 Each byte is mapped to a tone between C4 (261.63 Hz) and C7 (2093 Hz), played
 for 50 ms. Only the first 1000 bytes of each file are used, and the result is
-saved as a WAV in `malware_tone_audio/`.
+saved as a WAV. In folder mode each output is named `<input name>_tones.wav`.
 
-Parameters (image width, tone duration, sample rate, max bytes) are set at the
-bottom of each script.
+Other parameters (image width, tone duration, sample rate, max bytes) are still
+set in the code.
 
 ## Sample data
 
